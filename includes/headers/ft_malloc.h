@@ -11,8 +11,17 @@
 #include "../libft/libft.h"
 
 #define TINY_MAX_SIZE 128
+#define TINY_BLOCK_SIZE (sizeof(t_block) + TINY_MAX_SIZE)
+#define TINY_ZONE_SIZE ROUND_UP_PAGE(sizeof(t_zone) + (TINY_BLOCK_SIZE * 100))
+
 #define SMALL_MAX_SIZE 1024
+#define SMALL_BLOCK_SIZE (sizeof(t_block) + SMALL_MAX_SIZE)
+#define SMALL_ZONE_SIZE ROUND_UP_PAGE(sizeof(t_zone) + (SMALL_BLOCK_SIZE * 100))
+
+#define ROUND_UP_PAGE(size) ((((size) + getpagesize() - 1) / getpagesize()) * getpagesize())
+
 #define ALIGN(size) (((size) + 15) & ~15)
+#define TI
 
 typedef struct s_block {
 	size_t size;

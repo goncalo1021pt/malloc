@@ -3,6 +3,6 @@
 void *realloc(void *ptr, size_t size)
 {
 	// Implementation of realloc
-	printf("realloc of %p called with size: %zu\n", ptr, size);
+	ft_printf("realloc of %p called with size: %zu\n", ptr, size);
 	return NULL; // Placeholder
 }

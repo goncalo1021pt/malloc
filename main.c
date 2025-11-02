@@ -8,13 +8,16 @@ int main() {
 	}
 	char *str = ft_strdup("Hello, custom malloc!");
 	ft_printf("%s\n", str);
-	char *str2 = ft_strtrim(str, "Hd!");
-	ft_printf("Trimmed string: '%s'\n", str2);
-	show_alloc_mem();
-	free(ptr);
-	free(str);
-	free(str2);
-	free(NULL);
+	void *ptr2 = malloc(4912);
+	if (ptr2 == NULL) {
+		write(2, "malloc failed\n", 14);
+		return 1;
+	}
+	// show_alloc_mem();
+	// free(ptr);
+	// free(str);
+	// free(str2);
+	// free(NULL);
 	show_alloc_mem();
 	return 0;
 }
