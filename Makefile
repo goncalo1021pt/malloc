@@ -4,6 +4,7 @@ endif
 
 NAME = libft_malloc_$(HOSTTYPE).so
 BIN_NAME = test_malloc
+SYMLINK_NAME = libft_malloc.so
 
 SRCS = $(wildcard srcs/*.c)
 OBJS = $(addprefix $(OBJS_DIR),$(SRCS:$(SRCS_DIR)%.c=%.o))
@@ -13,7 +14,7 @@ HEADERS = -I includes/headers/
 HDRS = $(wildcard includes/headers/*.h)
 
 RM = rm -f
-CFLAGS = -Wall -Wextra -Werror -g
+CFLAGS = -Wall -Wextra -Werror -g -fPIC
 SFLAGS = -fsanitize=address
 VFLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes
 CC = cc
@@ -29,7 +30,7 @@ BLUE = \033[0;34m
 ORANGE = \033[0;33m
 NC = \033[0m
 
-all: $(NAME) symlink
+all: $(NAME) $(SYMLINK_NAME)
 
 $(OBJS_DIR)%.o: $(SRCS_DIR)%.c $(HDRS)
 	@mkdir -p $(dir $@)
@@ -44,9 +45,9 @@ $(NAME): $(OBJS) $(LIBFT)
 	@$(CC) $(CFLAGS) -shared -o $(NAME) $(OBJS) $(LIBFT)
 	@echo "$(GREEN)$(NAME)$(NC) ready!"
 
-symlink:
-	@ln -sf $(NAME) libft_malloc.so
-	@echo "$(BLUE)Created symlink: libft_malloc.so -> $(NAME)$(NC)"
+$(SYMLINK_NAME): $(NAME)
+	@ln -sf $(NAME) $(SYMLINK_NAME)
+	@echo "$(BLUE)Created symlink: $(SYMLINK_NAME) -> $(NAME)$(NC)"
 
 $(BONUS_NAME): $(BONUS_OBJS) $(LIBFT)
 	@$(CC) $(CFLAGS) -o $(BONUS_NAME) $(BONUS_OBJS) $(LIBFT)
@@ -70,7 +71,7 @@ clean:
 
 fclean: clean
 	@$(RM) $(NAME)
-	@$(RM) libft_malloc.so
+	@$(RM) $(SYMLINK_NAME)
 	@$(RM) $(BONUS_NAME)
 	@$(RM) $(BIN_NAME)
 	@$(MAKE) -C $(LIBFT_DIR) fclean --no-print-directory
@@ -92,6 +93,11 @@ run: all
 	@echo "$(GREEN)Running test with custom malloc...$(NC)"
 	@LD_PRELOAD=./libft_malloc.so ./$(BIN_NAME)
 
+test: all
+	@$(CC) $(CFLAGS) $(HEADERS) main.c $(LIBFT) -L. -lft_malloc_$(HOSTTYPE) -o $(BIN_NAME)
+	@echo "$(GREEN)Running test (custom functions)...$(NC)"
+	@LD_LIBRARY_PATH=. ./$(BIN_NAME)
+
 re: fclean all
 
-.PHONY: all fclean clean re v s fcount send run
+.PHONY: all fclean clean re v s fcount send run test
