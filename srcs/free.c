@@ -1,6 +1,6 @@
 #include "ft_malloc.h"
 
-int free_zone(t_zone **current, void *ptr)
+static int free_zone(t_zone **current, void *ptr)
 {
 	t_zone *zone;
 	t_block *block;
@@ -13,7 +13,6 @@ int free_zone(t_zone **current, void *ptr)
 			while (block) {
 				if ((void *)block->data == ptr) {
 					block->free = 1;
-					pthread_mutex_unlock(&g_malloc_metadata.mutex);
 					return 1;
 				}
 				block = block->next;
@@ -48,11 +47,15 @@ void free(void *ptr)
 	}
 	
 	current = &g_malloc_metadata.tiny;
-	if (free_zone(current, ptr))
+	if (free_zone(current, ptr)) {
+		pthread_mutex_unlock(&g_malloc_metadata.mutex);
 		return;
+	}
 
 	current = &g_malloc_metadata.small;
-	if (free_zone(current, ptr))
+	if (free_zone(current, ptr)) {
+		pthread_mutex_unlock(&g_malloc_metadata.mutex);
 		return;
+	}
 	pthread_mutex_unlock(&g_malloc_metadata.mutex);
 }
