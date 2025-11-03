@@ -5,6 +5,7 @@ endif
 NAME = libft_malloc_$(HOSTTYPE).so
 BIN_NAME = test_malloc
 SYMLINK_NAME = libft_malloc.so
+BIN_TO_RUN = ./test_malloc
 
 SRCS = $(wildcard srcs/*.c)
 OBJS = $(addprefix $(OBJS_DIR),$(SRCS:$(SRCS_DIR)%.c=%.o))
@@ -78,9 +79,9 @@ fclean: clean
 	@echo "$(RED)$(NAME)$(NC) cleaned!"
 
 v: all
-	@$(CC) $(CFLAGS) $(HEADERS) main.c $(LIBFT) -o $(BIN_NAME)
+	@$(CC) $(CFLAGS) $(HEADERS) main.c -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath=. $(LIBFT) -o $(BIN_NAME)
 	@echo "$(GREEN)Running test with valgrind and custom malloc...$(NC)"
-	@LD_PRELOAD=./libft_malloc.so valgrind $(VFLAGS) ./$(BIN_NAME)
+	@LD_LIBRARY_PATH=. valgrind $(VFLAGS) ./$(BIN_TO_RUN)
 
 fcount:
 	@echo "you wrote $(RED)$(shell cat $(SRCS) | wc -l)$(NC)lines of code"
@@ -89,15 +90,14 @@ send: fclean
 	git add . && git commit -m "auto" && git push
 
 run: all
-	@$(CC) $(CFLAGS) $(HEADERS) main.c $(LIBFT) -o $(BIN_NAME)
+	@$(CC) $(CFLAGS) $(HEADERS) main.c $(LIBFT) -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath=. -o $(BIN_NAME)
 	@echo "$(GREEN)Running test with custom malloc...$(NC)"
-	@LD_PRELOAD=./libft_malloc.so ./$(BIN_NAME)
+	@./$(BIN_NAME)
 
-test: all
-	@$(CC) $(CFLAGS) $(HEADERS) main.c $(LIBFT) -L. -lft_malloc_$(HOSTTYPE) -o $(BIN_NAME)
-	@echo "$(GREEN)Running test (custom functions)...$(NC)"
-	@LD_LIBRARY_PATH=. ./$(BIN_NAME)
+test_preload: all
+	@echo "$(GREEN)Loading custom malloc into: $(PROG)$(NC)"
+	@LD_PRELOAD=./$(SYMLINK_NAME) $(PROG)
 
 re: fclean all
 
-.PHONY: all fclean clean re v s fcount send run test
+.PHONY: all fclean clean re v s fcount send run test test_preload

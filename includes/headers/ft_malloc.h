@@ -57,4 +57,10 @@ void *realloc(void *ptr, size_t size);
 
 void show_alloc_mem(void);
 
+// aux.c
+void write_str(int fd, const char *str);
+void write_hex(int fd, void *ptr);
+void write_number(int fd, size_t num);	
+size_t ft_strlen_local(const char *s);
+
 #endif

@@ -129,14 +129,14 @@ static void *allocate_small(size_t size) {
 }
 
 void *malloc(size_t size) {
-
+	void *exit;
 	if (size == 0)
 		return NULL;
-
 	if (size <= TINY_MAX_SIZE) 
-		return allocate_tiny(size);
+		exit = allocate_tiny(size);
 	else if (size <= SMALL_MAX_SIZE)
-		return allocate_small(size);
+		exit = allocate_small(size);
 	else 
-		return allocate_large(size);
+		exit = allocate_large(size);
+	return exit;
 }

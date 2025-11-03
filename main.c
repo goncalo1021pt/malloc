@@ -1,23 +1,33 @@
 #include "ft_malloc.h"
 
+void cleanup_check(void) {
+	write(1, "\n=== Memory state at program exit ===\n", 39);
+	show_alloc_mem();
+}
+
 int main() {
-	void *ptr = malloc(1000);
-	if (ptr == NULL) {
-		write(2, "malloc failed\n", 14);
+	char *str;
+	atexit(cleanup_check);
+
+	str = ft_strdup("Hello, World!");
+	if (!str) {
+		write(2, "strdup failed\n", 15);
 		return 1;
 	}
-	char *str = ft_strdup("Hello, custom malloc!");
-	ft_printf("%s\n", str);
-	void *ptr2 = malloc(4912);
-	if (ptr2 == NULL) {
-		write(2, "malloc failed\n", 14);
+	printf("%s\n", str);
+	str = realloc(str, 51);
+	if (!str) {
+		write(2, "realloc failed\n", 16);
 		return 1;
 	}
-	// show_alloc_mem();
-	free(ptr);
+	int ctd = 0;
+	while (ctd < 50) {
+		str[ctd] = 'A';
+		ctd++;
+	}
+	str[ctd] = '\0';
+	printf("%s\n", str);
 	free(str);
-	free(ptr2);
-	free(NULL);
 	show_alloc_mem();
 	return 0;
 }

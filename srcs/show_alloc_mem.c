@@ -1,26 +1,30 @@
 #include "ft_malloc.h"
 
-
 static void display_zones(const char *label, t_zone *zone, int fd)
 {
 	t_block *block;
 
 	while (zone) {
-		ft_fprintf(fd, "%s : %p\n", label, zone->start);
+		write_str(fd, label);
+		write_str(fd, " : ");
+		write_hex(fd, zone->start);
+		write_str(fd, "\n");
+		
 		block = zone->blocks;
 		while (block) {
 			if (!block->free) {
-				ft_fprintf(fd, "%p - %p : %d bytes\n", 
-					(void *)block->data, 
-					(void *)((char *)block->data + block->size), 
-					block->size);
+				write_hex(fd, (void *)block->data);
+				write_str(fd, " - ");
+				write_hex(fd, (void *)((char *)block->data + block->size));
+				write_str(fd, " : ");
+				write_number(fd, block->size);
+				write_str(fd, " bytes\n");
 			}
 			block = block->next;
 		}
 		zone = zone->next;
 	}
 }
-
 
 void show_alloc_mem(void)
 {
