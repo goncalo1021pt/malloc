@@ -14,10 +14,10 @@ int main() {
 		return 1;
 	}
 	// show_alloc_mem();
-	// free(ptr);
-	// free(str);
-	// free(str2);
-	// free(NULL);
+	free(ptr);
+	free(str);
+	free(ptr2);
+	free(NULL);
 	show_alloc_mem();
 	return 0;
 }

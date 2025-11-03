@@ -21,7 +21,6 @@
 #define ROUND_UP_PAGE(size) ((((size) + getpagesize() - 1) / getpagesize()) * getpagesize())
 
 #define ALIGN(size) (((size) + 15) & ~15)
-#define TI
 
 typedef struct s_block {
 	size_t size;

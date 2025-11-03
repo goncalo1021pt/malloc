@@ -20,7 +20,7 @@ static void *allocate_large(size_t size) {
 	zone->zone_size = total_size;
 	zone->block_count = 1;
 
-	block = ((t_block *)(char *)zone + sizeof(t_zone));
+	block = (t_block *)((char *)zone + sizeof(t_zone));
 	block->size = size;
 	block->free = 0;
 	block->next = NULL;
@@ -43,7 +43,7 @@ t_zone *create_zone(size_t zone_size, size_t block_size) {
 
 	zone->start = zone;
 	zone->zone_size = zone_size;
-	zone->block_count = zone_size / block_size - 1;
+	zone->block_count = (zone_size - sizeof(t_zone)) / block_size;
 	zone->next = NULL;
 
 	block = (t_block *)((char *)zone + sizeof(t_zone));
@@ -80,8 +80,10 @@ t_block *find_free_block_in_zones(t_zone *zone_list, size_t size) {
 
 static void *allocate_tiny(size_t size) {
 	t_block *block;
-	ft_printf("TINY ALLOC\n");
+
 	pthread_mutex_lock(&g_malloc_metadata.mutex);
+	size = ALIGN(size);
+
 	block = find_free_block_in_zones(g_malloc_metadata.tiny, size);
 	if (block) {
 		block->free = 0;
@@ -103,8 +105,10 @@ static void *allocate_tiny(size_t size) {
 
 static void *allocate_small(size_t size) {
 	t_block *block;
-	ft_printf("SMALL ALLOC\n");
+
 	pthread_mutex_lock(&g_malloc_metadata.mutex);
+	size = ALIGN(size);
+
 	block = find_free_block_in_zones(g_malloc_metadata.small, size);
 	if (block) {
 		block->free = 0;
