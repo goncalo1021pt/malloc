@@ -19,6 +19,7 @@ static void *allocate_large(size_t size) {
 	zone->start = zone;
 	zone->zone_size = total_size;
 	zone->block_count = 1;
+	zone->blocks_allocated = 1;
 
 	block = (t_block *)((char *)zone + sizeof(t_zone));
 	block->size = size;
@@ -45,12 +46,13 @@ t_zone *create_zone(size_t zone_size, size_t block_size) {
 	zone->start = zone;
 	zone->zone_size = zone_size;
 	zone->block_count = (zone_size - sizeof(t_zone)) / block_size;
+	zone->blocks_allocated = 0;
 	zone->next = NULL;
 
 	block = (t_block *)((char *)zone + sizeof(t_zone));
 	zone->blocks = block;
 
-	for (size_t ctd = 0; ctd < zone->block_count; ctd++) {
+	for (int ctd = 0; ctd < zone->block_count; ctd++) {
 		block->size = block_size - sizeof(t_block);
 		block->free = 1;
 		if (ctd < zone->block_count - 1)
@@ -90,9 +92,19 @@ static void *allocate_tiny(size_t size) {
 	block = find_free_block_in_zones(g_malloc_metadata.tiny, size);
 	if (block) {
 		block->free = 0;
+		t_zone *zone = g_malloc_metadata.tiny;
+		while (zone) {
+			if ((void *)block >= zone->start && 
+				(void *)block < (void *)((char *)zone->start + zone->zone_size)) {
+				zone->blocks_allocated++;
+				break;
+			}
+			zone = zone->next;
+		}
 		pthread_mutex_unlock(&g_malloc_metadata.mutex);
 		return (void *)(block->data);
 	}
+
 	t_zone *new_zone = create_zone(TINY_ZONE_SIZE, TINY_BLOCK_SIZE);
 	if (!new_zone) {
 		pthread_mutex_unlock(&g_malloc_metadata.mutex);
@@ -100,8 +112,11 @@ static void *allocate_tiny(size_t size) {
 	}
 	new_zone->next = g_malloc_metadata.tiny;
 	g_malloc_metadata.tiny = new_zone;
+
 	block = new_zone->blocks;
 	block->free = 0;
+	new_zone->blocks_allocated = 1;
+
 	pthread_mutex_unlock(&g_malloc_metadata.mutex);
 	return (void *)(block->data);
 }
@@ -115,9 +130,19 @@ static void *allocate_small(size_t size) {
 	block = find_free_block_in_zones(g_malloc_metadata.small, size);
 	if (block) {
 		block->free = 0;
+		t_zone *zone = g_malloc_metadata.small;
+		while (zone) {
+			if ((void *)block >= zone->start && 
+				(void *)block < (void *)((char *)zone->start + zone->zone_size)) {
+				zone->blocks_allocated++;
+				break;
+			}
+			zone = zone->next;
+		}
 		pthread_mutex_unlock(&g_malloc_metadata.mutex);
 		return (void *)(block->data);
 	}
+
 	t_zone *new_zone = create_zone(SMALL_ZONE_SIZE, SMALL_BLOCK_SIZE);
 	if (!new_zone) {
 		pthread_mutex_unlock(&g_malloc_metadata.mutex);
@@ -125,8 +150,11 @@ static void *allocate_small(size_t size) {
 	}
 	new_zone->next = g_malloc_metadata.small;
 	g_malloc_metadata.small = new_zone;
+
 	block = new_zone->blocks;
 	block->free = 0;
+	new_zone->blocks_allocated = 1;
+
 	pthread_mutex_unlock(&g_malloc_metadata.mutex);
 	return (void *)(block->data);
 }

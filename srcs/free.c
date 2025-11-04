@@ -1,7 +1,8 @@
 #include "ft_malloc.h"
 
-static int free_zone(t_zone **current, void *ptr)
+static int free_zone(t_zone **zone_list, void *ptr)
 {
+	t_zone **current = zone_list;
 	t_zone *zone;
 	t_block *block;
 
@@ -13,6 +14,11 @@ static int free_zone(t_zone **current, void *ptr)
 			while (block) {
 				if ((void *)block->data == ptr) {
 					block->free = 1;
+					zone->blocks_allocated--; 
+					if (zone->blocks_allocated == 0 && zone->next != NULL) {
+						*current = zone->next;
+						munmap(zone, zone->zone_size);
+					}
 					return 1;
 				}
 				block = block->next;

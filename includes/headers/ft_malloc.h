@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #define TINY_MAX_SIZE 128
 #define TINY_BLOCK_SIZE (sizeof(t_block) + TINY_MAX_SIZE)
@@ -25,7 +26,7 @@
 
 typedef struct s_block {
 	size_t size;
-	int free;
+	bool free;
 	struct s_block *next;
 	char data[1];
 } t_block;
@@ -33,7 +34,8 @@ typedef struct s_block {
 typedef struct s_zone {
 	void *start;
 	size_t zone_size;
-	size_t block_count;
+	int block_count;
+	int blocks_allocated;
 	struct s_zone *next;
 	t_block *blocks;
 } t_zone;
