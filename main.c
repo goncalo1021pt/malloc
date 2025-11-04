@@ -1,4 +1,5 @@
 #include "ft_malloc.h"
+#include <stdlib.h>
 
 void cleanup_check(void) {
 	write(1, "\n=== Memory state at program exit ===\n", 39);
@@ -9,7 +10,7 @@ int main() {
 	char *str;
 	atexit(cleanup_check);
 
-	str = ft_strdup("Hello, World!");
+	str = strdup("Hello, World! This is a test string for malloc and realloc.");
 	if (!str) {
 		write(2, "strdup failed\n", 15);
 		return 1;
@@ -27,7 +28,9 @@ int main() {
 	}
 	str[ctd] = '\0';
 	printf("%s\n", str);
+	void *ptr1 = calloc(5000, sizeof(char));
+	printf("Allocated 5000 bytes at %p\n", ptr1);
+	free(ptr1);
 	free(str);
-	show_alloc_mem();
 	return 0;
 }

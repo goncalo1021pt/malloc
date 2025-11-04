@@ -38,8 +38,9 @@ t_zone *create_zone(size_t zone_size, size_t block_size) {
 	t_block *block;
 
 	zone = mmap(NULL, zone_size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-	if (zone == MAP_FAILED)
+	if (zone == MAP_FAILED) {
 		return NULL;
+	}
 
 	zone->start = zone;
 	zone->zone_size = zone_size;
@@ -54,8 +55,10 @@ t_zone *create_zone(size_t zone_size, size_t block_size) {
 		block->free = 1;
 		if (ctd < zone->block_count - 1)
 			block->next = (t_block *)((char *)block + block_size);
-		else
+		else {
 			block->next = NULL;
+			break;
+		}
 		block = block->next;
 	}
 	return zone;
@@ -129,14 +132,12 @@ static void *allocate_small(size_t size) {
 }
 
 void *malloc(size_t size) {
-	void *exit;
 	if (size == 0)
 		return NULL;
 	if (size <= TINY_MAX_SIZE) 
-		exit = allocate_tiny(size);
+		return allocate_tiny(size);
 	else if (size <= SMALL_MAX_SIZE)
-		exit = allocate_small(size);
+		return allocate_small(size);
 	else 
-		exit = allocate_large(size);
-	return exit;
+		return allocate_large(size);
 }

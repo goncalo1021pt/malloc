@@ -7,8 +7,9 @@
 #include <sys/resource.h>
 #include <pthread.h>
 #include <sys/time.h>
-
-#include "../libft/libft.h"
+#include <errno.h>
+#include <string.h>
+#include <stdio.h>
 
 #define TINY_MAX_SIZE 128
 #define TINY_BLOCK_SIZE (sizeof(t_block) + TINY_MAX_SIZE)
@@ -55,6 +56,9 @@ void free(void *ptr);
 // realloc.c
 void *realloc(void *ptr, size_t size);
 
+// calloc.c
+void *calloc(size_t nmemb, size_t size);
+
 void show_alloc_mem(void);
 
 // aux.c
@@ -62,5 +66,6 @@ void write_str(int fd, const char *str);
 void write_hex(int fd, void *ptr);
 void write_number(int fd, size_t num);	
 size_t ft_strlen_local(const char *s);
+void *ft_memcpy(void *dest, const void *src, size_t n);
 
 #endif

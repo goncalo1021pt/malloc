@@ -1,6 +1,6 @@
 #include "ft_malloc.h"
 
-t_block *get_block_from_ptr(void *ptr) {
+static t_block *get_block_from_ptr(void *ptr) {
 	t_zone *zone;
 	t_block *block;
 

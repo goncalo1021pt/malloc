@@ -59,6 +59,22 @@ void write_number(int fd, size_t num)
 		num /= 10;
 		i--;
 	}
-	
 	write(fd, buffer + i + 1, 30 - i);
+}
+
+void    *ft_memcpy(void *dest, const void *src, size_t n)
+{
+        unsigned char           *mem;
+        const unsigned char     *old;
+        size_t                          ctd;
+
+        ctd = 0;
+        mem = dest;
+        old = src;
+        while (ctd < n && (src || dest))
+        {
+                mem[ctd] = old[ctd];
+                ctd++;
+        }
+        return (dest);
 }
