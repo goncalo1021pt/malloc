@@ -3,28 +3,26 @@
 
 void test_zone_freeing() {
 	write(1, "\n=== Testing Zone Freeing ===\n", 31);
-	
-	void *tiny_ptrs[150];
-	
+	void *ptrs[150];
 	for (int i = 0; i < 150; i++) {
-		tiny_ptrs[i] = malloc(50);
+		ptrs[i] = malloc(10);
 	}
 	
-	write(1, "After 150 allocations (2 zones):\n", 34);
+	write(1, "\n=== Allocated 150 tiny blocks of 10 bytes each ===\n", 45);
 	show_alloc_mem();
-	
-	for (int i = 100; i < 150; i++) {
-		free(tiny_ptrs[i]);
+	for (int i = 0; i < 150; i++) {
+		free(ptrs[i]);
 	}
-	
-	write(1, "\nAfter freeing zone 2 (should be munmapped):\n", 46);
+	for (int i = 0; i < 150; i++) {
+		ptrs[i] = malloc(100);
+	}
+
+	write(1, "\n=== Allocated 150 tiny blocks of 100 bytes each ===\n", 45);
 	show_alloc_mem();
-	
-	for (int i = 0; i < 100; i++) {
-		free(tiny_ptrs[i]);
+	for (int i = 0; i < 150; i++) {
+		free(ptrs[i]);
 	}
-	
-	write(1, "\nAfter freeing all (zone 1 should remain):\n", 44);
+	write(1, "\n=== After freeing all tiny blocks ===\n", 38);
 	show_alloc_mem();
 }
 

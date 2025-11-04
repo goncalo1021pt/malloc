@@ -61,7 +61,7 @@ fclean: clean
 v: all
 	@$(CC) $(CFLAGS) $(HEADERS) main.c -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath=. -o $(BIN_NAME)
 	@echo "$(GREEN)Running test with valgrind and custom malloc...$(NC)"
-	@LD_LIBRARY_PATH=. valgrind $(VFLAGS) ./$(BIN_TO_RUN)
+	@LD_LIBRARY_PATH=. valgrind $(VFLAGS) $(BIN_TO_RUN)
 
 fcount:
 	@echo "you wrote $(RED)$(shell cat $(SRCS) | wc -l)$(NC)lines of code"

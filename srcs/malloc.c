@@ -36,7 +36,6 @@ static void *allocate_large(size_t size) {
 
 t_zone *create_zone(size_t zone_size, size_t block_size) {
 	t_zone *zone;
-	t_block *block;
 
 	zone = mmap(NULL, zone_size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 	if (zone == MAP_FAILED) {
@@ -48,22 +47,49 @@ t_zone *create_zone(size_t zone_size, size_t block_size) {
 	zone->block_count = (zone_size - sizeof(t_zone)) / block_size;
 	zone->blocks_allocated = 0;
 	zone->next = NULL;
+	zone->blocks = NULL;
+	return zone;
+}
 
-	block = (t_block *)((char *)zone + sizeof(t_zone));
-	zone->blocks = block;
+static void *get_zone_end(t_zone *zone) {
+	t_block *block = zone->blocks;
+	void *end = (char *)zone + sizeof(t_zone);
 
-	for (int ctd = 0; ctd < zone->block_count; ctd++) {
-		block->size = block_size - sizeof(t_block);
-		block->free = 1;
-		if (ctd < zone->block_count - 1)
-			block->next = (t_block *)((char *)block + block_size);
-		else {
-			block->next = NULL;
-			break;
-		}
+	while (block) {
+		void *block_end = (char *)block + sizeof(t_block) + block->size;
+		if (block_end > end) 
+			end = block_end;
 		block = block->next;
 	}
-	return zone;
+	return end;
+}
+
+static t_block *carve_block(t_zone *zone, size_t size) {
+	void *zone_end = (char *)zone + zone->zone_size;
+	void *current_end = get_zone_end(zone);
+	size_t space_needed = sizeof(t_block) + size;
+
+	if ((char *)current_end + space_needed > (char *)zone_end)
+		return NULL;
+
+	t_block *new_block = (t_block *)current_end;
+	new_block->size = size;
+	new_block->free = 0;
+	new_block->next = NULL;
+
+	if (zone->blocks == NULL)
+		zone->blocks = new_block;
+	else {
+		t_block *last = zone->blocks;
+		while (last->next)
+			last = last->next;
+		last->next = new_block;
+	}
+
+	zone->block_count++;
+	zone->blocks_allocated++;
+
+	return new_block;
 }
 
 t_block *find_free_block_in_zones(t_zone *zone_list, size_t size) {
@@ -80,26 +106,38 @@ t_block *find_free_block_in_zones(t_zone *zone_list, size_t size) {
 		}
 		zone = zone->next;
 	}
+
+	zone = zone_list;
+	while (zone) {
+		block = carve_block(zone, size);
+		if (block)
+			return block;
+		zone = zone->next;
+	}
 	return NULL;
 }
 
 static void *allocate_tiny(size_t size) {
 	t_block *block;
+	bool was_free;
 
 	pthread_mutex_lock(&g_malloc_metadata.mutex);
 	size = ALIGN(size);
 
 	block = find_free_block_in_zones(g_malloc_metadata.tiny, size);
 	if (block) {
+		was_free = block->free;
 		block->free = 0;
-		t_zone *zone = g_malloc_metadata.tiny;
-		while (zone) {
-			if ((void *)block >= zone->start && 
-				(void *)block < (void *)((char *)zone->start + zone->zone_size)) {
-				zone->blocks_allocated++;
-				break;
+		if (was_free) {
+			t_zone *zone = g_malloc_metadata.tiny;
+			while (zone) {
+				if ((void *)block >= zone->start && 
+					(void *)block < (void *)((char *)zone->start + zone->zone_size)) {
+					zone->blocks_allocated++;
+					break;
+				}
+				zone = zone->next;
 			}
-			zone = zone->next;
 		}
 		pthread_mutex_unlock(&g_malloc_metadata.mutex);
 		return (void *)(block->data);
@@ -113,9 +151,11 @@ static void *allocate_tiny(size_t size) {
 	new_zone->next = g_malloc_metadata.tiny;
 	g_malloc_metadata.tiny = new_zone;
 
-	block = new_zone->blocks;
-	block->free = 0;
-	new_zone->blocks_allocated = 1;
+	block = carve_block(new_zone, size);
+	if (!block) {
+		pthread_mutex_unlock(&g_malloc_metadata.mutex);
+		return NULL;
+	}
 
 	pthread_mutex_unlock(&g_malloc_metadata.mutex);
 	return (void *)(block->data);
@@ -123,21 +163,25 @@ static void *allocate_tiny(size_t size) {
 
 static void *allocate_small(size_t size) {
 	t_block *block;
+	bool was_free;
 
 	pthread_mutex_lock(&g_malloc_metadata.mutex);
 	size = ALIGN(size);
 
 	block = find_free_block_in_zones(g_malloc_metadata.small, size);
 	if (block) {
+		was_free = block->free;
 		block->free = 0;
-		t_zone *zone = g_malloc_metadata.small;
-		while (zone) {
-			if ((void *)block >= zone->start && 
-				(void *)block < (void *)((char *)zone->start + zone->zone_size)) {
-				zone->blocks_allocated++;
-				break;
+		if (was_free) {
+			t_zone *zone = g_malloc_metadata.small;
+			while (zone) {
+				if ((void *)block >= zone->start && 
+					(void *)block < (void *)((char *)zone->start + zone->zone_size)) {
+					zone->blocks_allocated++;
+					break;
+				}
+				zone = zone->next;
 			}
-			zone = zone->next;
 		}
 		pthread_mutex_unlock(&g_malloc_metadata.mutex);
 		return (void *)(block->data);
@@ -151,9 +195,11 @@ static void *allocate_small(size_t size) {
 	new_zone->next = g_malloc_metadata.small;
 	g_malloc_metadata.small = new_zone;
 
-	block = new_zone->blocks;
-	block->free = 0;
-	new_zone->blocks_allocated = 1;
+	block = carve_block(new_zone, size);
+	if (!block) {
+		pthread_mutex_unlock(&g_malloc_metadata.mutex);
+		return NULL;
+	}
 
 	pthread_mutex_unlock(&g_malloc_metadata.mutex);
 	return (void *)(block->data);
