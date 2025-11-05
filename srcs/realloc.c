@@ -50,6 +50,8 @@ void *realloc(void *ptr, size_t size)
 	size_t old_size;
 	void *new_ptr;
 
+	init_debug_config();
+	
 	if (!ptr)
 		return malloc(size);
 
@@ -80,6 +82,9 @@ void *realloc(void *ptr, size_t size)
 		return NULL;
 	ft_memcpy(new_ptr, ptr, old_size);
 	free(ptr);
+	
+	g_debug_config.total_reallocs++;
+	debug_log_realloc(ptr, new_ptr, size);
 
 	return new_ptr;
 }

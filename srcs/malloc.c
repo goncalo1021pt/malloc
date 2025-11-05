@@ -191,12 +191,25 @@ static void *allocate_small(size_t size) {
 }
 
 void *malloc(size_t size) {
+	void *ptr;
+	
+	init_debug_config();
+	
 	if (size == 0)
 		return NULL;
+	
 	if (size <= TINY_MAX_SIZE) 
-		return allocate_tiny(size);
+		ptr = allocate_tiny(size);
 	else if (size <= SMALL_MAX_SIZE)
-		return allocate_small(size);
+		ptr = allocate_small(size);
 	else 
-		return allocate_large(size);
+		ptr = allocate_large(size);
+	
+	if (ptr) {
+		g_debug_config.total_mallocs++;
+		debug_perturb_alloc(ptr, size);
+		debug_log_malloc(ptr, size);
+	}
+	
+	return ptr;
 }

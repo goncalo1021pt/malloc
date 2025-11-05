@@ -78,3 +78,80 @@ void    *ft_memcpy(void *dest, const void *src, size_t n)
         }
         return (dest);
 }
+
+void write_color(int fd, const char *color)
+{
+	write_str(fd, color);
+}
+
+int is_printable(unsigned char c)
+{
+	return (c >= 32 && c <= 126);
+}
+
+void write_byte_hex(int fd, unsigned char byte)
+{
+	char hex[] = "0123456789abcdef";
+	char buffer[3];
+	
+	buffer[0] = hex[byte >> 4];
+	buffer[1] = hex[byte & 0x0F];
+	buffer[2] = '\0';
+	write(fd, buffer, 2);
+}
+
+void print_ascii(int fd, unsigned char *data, size_t len)
+{
+	size_t i;
+	
+	write_str(fd, "|");
+	for (i = 0; i < 16; i++) {
+		if (i < len) {
+			if (is_printable(data[i]))
+				write(fd, (char *)&data[i], 1);
+			else
+				write_str(fd, ".");
+		} else {
+			write_str(fd, " ");
+		}
+	}
+	write_str(fd, "|");
+}
+
+void print_hexdump(int fd, void *ptr, size_t size, size_t max_bytes)
+{
+	unsigned char *data = (unsigned char *)ptr;
+	size_t offset = 0;
+	size_t bytes_to_dump = size > max_bytes ? max_bytes : size;
+	size_t i;
+	
+	while (offset < bytes_to_dump) {
+		write_str(fd, "    ");
+		write_hex(fd, (void *)((unsigned long)data + offset));
+		write_str(fd, ": ");
+		
+		for (i = 0; i < 16; i++) {
+			if (offset + i < bytes_to_dump) {
+				write_byte_hex(fd, data[offset + i]);
+				write_str(fd, " ");
+			} else {
+				write_str(fd, "   ");
+			}
+			
+			if (i == 7)
+				write_str(fd, " ");
+		}
+		
+		write_str(fd, " ");
+		print_ascii(fd, data + offset, bytes_to_dump - offset);
+		write_str(fd, "\n");
+		
+		offset += 16;
+	}
+	
+	if (size > max_bytes) {
+		write_str(fd, "    ... (");
+		write_number(fd, size - max_bytes);
+		write_str(fd, " more bytes)\n");
+	}
+}
