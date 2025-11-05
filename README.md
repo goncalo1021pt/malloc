@@ -3,7 +3,7 @@
 A high-performance, thread-safe memory allocator implementation in C that serves as a drop-in replacement for the standard library's `malloc`, `free`, `realloc`, and `calloc` functions. This project was developed as part of the 42 School curriculum and includes advanced debugging features and optimizations.
 
 [![Language](https://img.shields.io/badge/language-C-blue.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
-[![42 School](https://img.shields.io/badge/42-School-000000?logo=42)](https://42.fr)
+[![42 School](https://img.shields.io/badge/42-School-000000?logo=42)](https://42lisboa.com)
 
 ## 📋 Table of Contents
 
