@@ -3,7 +3,7 @@
 A high-performance, thread-safe memory allocator implementation in C that serves as a drop-in replacement for the standard library's `malloc`, `free`, `realloc`, and `calloc` functions. This project was developed as part of the 42 School curriculum and includes advanced debugging features and optimizations.
 
 [![Language](https://img.shields.io/badge/language-C-blue.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
-[![42 School](https://img.shields.io/badge/42-School-000000?logo=42)](https://42.fr)
+[![42 School](https://img.shields.io/badge/42-School-000000?logo=42)](https://42lisboa.com)
 
 ## 📋 Table of Contents
 
@@ -55,16 +55,16 @@ The allocator organizes memory into three size categories:
 ```
 ┌─────────────────────────────────────────┐
 │  TINY Zone (multiple blocks)            │
-│  ┌──────────┬──────────┬──────────┐    │
-│  │ Block 1  │ Block 2  │ Block 3  │ ...│
-│  └──────────┴──────────┴──────────┘    │
+│  ┌──────────┬──────────┬──────────┐     │
+│  │ Block 1  │ Block 2  │ Block 3  │     │
+│  └──────────┴──────────┴──────────┘     │
 └─────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────┐
 │  SMALL Zone (multiple blocks)           │
-│  ┌──────────┬──────────┬──────────┐    │
-│  │ Block 1  │ Block 2  │ Block 3  │ ...│
-│  └──────────┴──────────┴──────────┘    │
+│  ┌──────────┬──────────┬──────────┐     │
+│  │ Block 1  │ Block 2  │ Block 3  │     │
+│  └──────────┴──────────┴──────────┘     │
 └─────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────┐
@@ -262,7 +262,7 @@ Fragmentation: 5%
 - O(free blocks) search instead of O(all blocks)
 - Fast reuse of freed memory
 
-### 3. **Block Coalescing**
+### 3. **Free Defragmentation**
 - Automatically merges adjacent free blocks
 - Reduces memory fragmentation
 - Maintains larger contiguous free spaces
