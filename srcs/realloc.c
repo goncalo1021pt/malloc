@@ -81,10 +81,11 @@ void *realloc(void *ptr, size_t size)
 	if (!new_ptr)
 		return NULL;
 	ft_memcpy(new_ptr, ptr, old_size);
-	free(ptr);
 	
 	g_debug_config.total_reallocs++;
 	debug_log_realloc(ptr, new_ptr, size);
+	
+	free(ptr);
 
 	return new_ptr;
 }
