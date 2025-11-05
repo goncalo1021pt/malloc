@@ -130,7 +130,7 @@ LD_PRELOAD=./libft_malloc_x86_64.so bash
 
 ```bash
 # Compile your program with the library
-gcc your_program.c -L. -lft_malloc -Wl,-rpath,. -o your_program
+cc your_program.c -L. -lft_malloc -Wl,-rpath,. -o your_program
 
 # Run normally
 ./your_program
