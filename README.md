@@ -262,7 +262,7 @@ Fragmentation: 5%
 - O(free blocks) search instead of O(all blocks)
 - Fast reuse of freed memory
 
-### 3. **Block Coalescing**
+### 3. **Free Defragmentation**
 - Automatically merges adjacent free blocks
 - Reduces memory fragmentation
 - Maintains larger contiguous free spaces
