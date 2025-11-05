@@ -31,9 +31,31 @@ void cleanup_check(void) {
 	show_alloc_mem();
 }
 
+#define NP 10000
 int main() {
 	atexit(cleanup_check);
 
-	test_zone_freeing();
+	void *ptrs[NP];
+	for (int i = 0; i < NP; i++) {
+		ptrs[i] = malloc(200);
+	}
+
+	write(1, "\n=== After initial allocations ===\n", 35);
+	// show_alloc_mem();
+	for (int i = 0; i < NP; i++) {
+		free(ptrs[i]);
+	}
+	for (int i = 0; i < NP; i++) {
+		ptrs[i] = malloc(200);
+	}
+	write(1, "\n=== After reallocations ===\n", 29);
+	// show_alloc_mem();
+	for (int i = 0; i < NP; i++) {
+		free(ptrs[i]);
+	}
+	// free(ptr1);
+	// free(ptr2);
+	// free(ptr3);
+	// test_zone_freeing();
 	return 0;
 }

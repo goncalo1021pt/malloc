@@ -28,16 +28,20 @@ typedef struct s_block {
 	size_t size;
 	bool free;
 	struct s_block *next;
+	struct s_block *prev;
+	struct s_block *free_next;
 	char data[1];
 } t_block;
 
 typedef struct s_zone {
 	void *start;
 	size_t zone_size;
-	int block_count;
 	int blocks_allocated;
+	int blocks_free;
 	struct s_zone *next;
 	t_block *blocks;
+	t_block *free_list;
+	void *zone_end;
 } t_zone;
 
 typedef struct s_malloc_metadata {
@@ -51,6 +55,8 @@ extern t_malloc_metadata g_malloc_metadata;
 
 // malloc.c
 void *malloc(size_t size);
+void add_to_free_list(t_zone *zone, t_block *block);
+void remove_from_free_list(t_zone *zone, t_block *block);
 
 // free.c
 void free(void *ptr);
