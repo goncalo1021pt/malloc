@@ -7,6 +7,8 @@ BIN_NAME = test_malloc
 SYMLINK_NAME = libft_malloc.so
 BIN_TO_RUN = ./test_malloc
 CURR_DIR = $(shell pwd)
+PROG = 
+DFLAGS =
 
 SRCS = $(wildcard srcs/*.c)
 OBJS = $(addprefix $(OBJS_DIR),$(SRCS:$(SRCS_DIR)%.c=%.o))
@@ -66,14 +68,9 @@ v: all
 fcount:
 	@echo "you wrote $(RED)$(shell cat $(SRCS) | wc -l)$(NC)lines of code"
 
-run: all
-	@$(CC) $(CFLAGS) $(HEADERS) main.c -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath=. -o $(BIN_NAME)
-	@echo "$(GREEN)Running test with custom malloc...$(NC)"
-	@./$(BIN_NAME)
-
 test_preload: all
 	@echo "$(GREEN)Loading custom malloc into: $(PROG)$(NC)"
-	@LD_PRELOAD=$(CURR_DIR)/$(SYMLINK_NAME) $(PROG)
+	@LD_PRELOAD=$(CURR_DIR)/$(SYMLINK_NAME) $(DFLAGS) $(PROG)
 
 re: fclean all
 
