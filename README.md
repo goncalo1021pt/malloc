@@ -409,7 +409,7 @@ This project is part of the 42 School curriculum.
 - ✅ Comprehensive test suite
 - ✅ Real-world testing (bash, ls, etc.)
 
-**Grade: 125/100** ⭐
+<!-- **Grade: 125/100** ⭐ -->
 
 ---
 
