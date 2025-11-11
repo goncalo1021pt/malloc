@@ -43,14 +43,12 @@ static int free_zone(t_zone **zone_list, void *ptr)
 			block = zone->blocks;
 			while (block) {
 				if ((void *)block->data == ptr) {
-					// Debug: check for double-free
-					if (debug_check_double_free(block)) {
-						return 1;  // Return success even on double-free to avoid crash
+					if (block->free) {
+						debug_check_double_free(block);
+						return 1;
 					}
 					
 					zone->blocks_allocated--;
-					
-					// Debug: fill freed memory with pattern
 					debug_perturb_free((void *)block->data, block->size);
 					
 					block = defragment_block(zone, block);

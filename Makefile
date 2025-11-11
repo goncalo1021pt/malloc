@@ -65,7 +65,7 @@ fcount:
 
 test_preload: all
 	@echo "$(GREEN)Loading custom malloc into: $(PROG)$(NC)"
-	@LD_PRELOAD=$(CURR_DIR)/$(SYMLINK_NAME) $(DFLAGS) $(PROG)
+	LD_PRELOAD=$(CURR_DIR)/$(SYMLINK_NAME) $(DFLAGS) $(PROG)
 
 re: fclean all
 

@@ -1,14 +1,34 @@
+ifeq ($(HOSTTYPE),)
+HOSTTYPE := $(shell uname -m)_$(shell uname -s)
+endif
+
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -I../includes/headers
 LDFLAGS = -L.. -lft_malloc -Wl,-rpath,..
-LIB = ../libft_malloc_x86_64.so
+LIB = ../libft_malloc_$(HOSTTYPE).so
+
+
+SRCS = $(wildcard *.c)
+OBJS_DIR = objs/
+OBJS = $(addprefix $(OBJS_DIR),$(SRCS:%.c=%.o))
 
 TESTS = test_perturb test_debug test_advanced test_comprehensive
 
+GREEN = \033[0;32m
+RED = \033[0;31m
+BLUE = \033[0;34m
+ORANGE = \033[0;33m
+NC = \033[0m
+
 all: $(TESTS)
 
-$(TESTS): %: %.c $(LIB)
-	@$(CC) $(CFLAGS) $< $(LDFLAGS) -o $@
+$(OBJS_DIR)%.o: %.c
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+$(TESTS): $(OBJS)
+	@$(CC) $(CFLAGS) -o $@ $@.c $(LDFLAGS)
+	@echo "$(GREEN)$@$(NC) compiled!"
 
 run_perturb: test_perturb
 	@echo "=== Running Perturb Test ==="
@@ -36,6 +56,12 @@ run_comprehensive: test_comprehensive
 run_all: run_perturb run_debug run_advanced run_comprehensive
 
 clean:
-	@rm -f $(TESTS)
+	@$(RM) -r $(OBJS_DIR)
+	@$(RM) $(TESTS)
+	@echo "$(RED)tests$(NC) cleaned!"
+
+fclean: clean
+
+re: fclean all
 
 .PHONY: all clean run_perturb run_debug run_advanced run_comprehensive run_all
