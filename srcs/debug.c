@@ -132,16 +132,21 @@ bool debug_check_double_free(t_block *block)
 		return false;
 	
 	if (block->free) {
-		write_color(2, COLOR_RED);
-		write_color(2, COLOR_BOLD);
-		write_str(2, "[ERROR] Double-free detected at ");
-		write_hex(2, (void *)block->data);
-		write_str(2, "\n");
-		write_color(2, COLOR_RESET);
+		debug_free_invalid_pointer((void *)block->data);
 		return true;
 	}
 	
 	return false;
+}
+
+void debug_free_invalid_pointer(void *ptr)
+{
+	write_color(2, COLOR_RED);
+	write_color(2, COLOR_BOLD);
+	write_str(2, "[ERROR] Double-free detected at ");
+	write_hex(2, ptr);
+	write_str(2, "\n");
+	write_color(2, COLOR_RESET);
 }
 
 void debug_show_stats(void)

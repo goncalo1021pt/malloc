@@ -112,6 +112,7 @@ void debug_log_realloc(void *old_ptr, void *new_ptr, size_t size);
 void debug_perturb_alloc(void *ptr, size_t size);
 void debug_perturb_free(void *ptr, size_t size);
 bool debug_check_double_free(t_block *block);
+void debug_free_invalid_pointer(void *ptr);
 void debug_show_stats(void);
 
 // aux.c

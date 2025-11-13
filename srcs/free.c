@@ -95,7 +95,6 @@ void free(void *ptr)
 		}
 		current = &(*current)->next;
 	}
-	
 	current = &g_malloc_metadata.tiny;
 	if (free_zone(current, ptr)) {
 		pthread_mutex_unlock(&g_malloc_metadata.mutex);
@@ -106,5 +105,9 @@ void free(void *ptr)
 		pthread_mutex_unlock(&g_malloc_metadata.mutex);
 		return;
 	}
+
+	if (g_debug_config.debug || g_debug_config.check)
+		debug_free_invalid_pointer(ptr);
+		
 	pthread_mutex_unlock(&g_malloc_metadata.mutex);
 }
