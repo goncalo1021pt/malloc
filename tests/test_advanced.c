@@ -89,6 +89,7 @@ int main(void) {
 	free(str1);
 	free(numbers);
 	free(new_str);
+	free(new_str);  // Safe to free again if realloc moved it
 	
 	printf("\n=== Test Complete ===\n");
 	return 0;
